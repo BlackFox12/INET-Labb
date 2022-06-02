@@ -1,6 +1,7 @@
 import socket
 from _thread import *
 import sys
+from src.server.board import Board
 
 
 class Server:
@@ -23,19 +24,34 @@ class Server:
         print("Waiting for a connection")
         self.reply = ''
 
-        self.currentId = "0"
+        self.currentId = "1"
 
-        # pos = board[1][1]
-        self.pos = ["0:1,1", "1:11,11"]
+        self.board = Board()
         while True:
             conn, addr = self.s.accept()
             print("Connected to: ", addr)
 
             start_new_thread(self.threaded_client, (conn,))
 
+    def handle_data(self, data):
+        array = data.split(":")
+        id = int(array[0])
+        command = array[1]
+        if command == "move":
+            direction = array[2]
+            self.board.move_character_if_possible(id, direction)
+        elif command == "throw":
+            pass
+            # TODO Calculate throw direction, Either place down under, or somehow save latest move direction
+        elif command == "pickup":
+            # TODO add pickups (power-ups) and ability to pick them up
+            pass
+
+
+
     def threaded_client(self, conn):
         conn.send(str.encode(self.currentId))
-        self.currentId = "1"
+        self.currentId = "2"
 
         while True:
             try:
@@ -50,7 +66,7 @@ class Server:
                     conn.send(str.encode("Goodbye"))
                     break
                 else:
-                    print("Recieved: " + reply)
+                    """print("Recieved: " + reply)
                     arr = reply.split(":")
                     id = int(arr[0])
                     self.pos[id] = reply
@@ -59,13 +75,18 @@ class Server:
                     if id == 1: nid = 0
 
                     reply = self.pos[nid][:]
-                    print("Sending: " + reply)
+                    print("Sending: " + reply) """
 
-                conn.sendall(str.encode(reply))
+                    self.handle_data(reply)
+
+                conn.sendall(str.encode(self.board.to_string()))
             except:
                 break
         print("Connection Closed")
         conn.close()
+
+
+
 
 
 

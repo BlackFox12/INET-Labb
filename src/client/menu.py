@@ -47,15 +47,8 @@ class Menu:
             None
         """
 
-        self.new_screen_entry()
-        while self.canvas.running:
-            self.canvas.draw_background()
-            self.canvas.draw_text("Waiting for other players", self.canvas.black_color, int(self.canvas.width / 2),
-                                  self.canvas.title_spacing_y)
-
-            self.canvas.create_button("Back", 0, int((self.canvas.width - self.canvas.button_width) / 2),
-                                      self.canvas.height - self.canvas.button_height * 3)
-            self.canvas.update_game_state()
+        pygame.quit()
+        Game()
 
     def settings_screen(self):
         """Shows the instructions for how to play the game

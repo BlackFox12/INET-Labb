@@ -2,7 +2,7 @@ import socket
 
 
 class Network:
-
+    # TODO: Make Network constantly listen to server so that it can get any updates it requires
     def __init__(self):
         self.client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.host = "localhost" # For this to work on your machine this must be equal to the ipv4 address of the machine running the server
@@ -16,7 +16,7 @@ class Network:
         self.client.connect(self.addr)
         return self.client.recv(2048).decode()
 
-    def send(self, data):
+    def listen_thread(self, data):
         """
         :param data: str
         :return: str
@@ -27,3 +27,5 @@ class Network:
             return reply
         except socket.error as e:
             return str(e)
+
+    def 

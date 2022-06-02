@@ -93,6 +93,12 @@ class Canvas:
         pygame.draw.rect(self.screen, self.grey_color, button)
         self.draw_text(buttonName, text_color, int(x + button_width / 2), int(y + button_height / 2))
 
+    def draw_bombit_rectangles(self, x, y, color):
+        rect_width = self.width/13
+        rect_height = self.height/13
+        rectangle = pygame.Rect(x*rect_width, y*rect_height, rect_width, rect_height)
+        pygame.draw.rect(self.screen, color, rectangle)
+
     def update_game_state(self, esq_shut_down = False):
         """Updates the game, handles all input from mouse and keyboard if valid
         In:

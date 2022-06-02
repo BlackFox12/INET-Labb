@@ -1,3 +1,5 @@
+import itertools
+
 class Board:
     def __init__(self):
         self.board = [['#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#'],
@@ -49,5 +51,13 @@ class Board:
                             return self.board
                         else:
                             return False
+
+    def to_string(self):
+        """
+        Code found here https://www.techiedelight.com/flatten-list-of-lists-python/
+
+        """
+
+        return ",".join(str(x) for x in itertools.chain.from_iterable(self.board))
 
 
