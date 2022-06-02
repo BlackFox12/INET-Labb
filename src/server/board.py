@@ -57,7 +57,6 @@ class Board:
         Code found here https://www.techiedelight.com/flatten-list-of-lists-python/
 
         """
-
         return ",".join(str(x) for x in itertools.chain.from_iterable(self.board))
 
 

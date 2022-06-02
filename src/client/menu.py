@@ -1,7 +1,6 @@
 import pygame
 from src.client.canvas import Canvas
-from src.client.game import Game
-from src.client.network import Network
+from src.client.client import Client
 
 class Menu:
 
@@ -48,7 +47,7 @@ class Menu:
         """
 
         pygame.quit()
-        Game()
+        Client()
 
     def settings_screen(self):
         """Shows the instructions for how to play the game

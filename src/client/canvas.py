@@ -1,4 +1,5 @@
 import pygame
+import math
 from pygame.locals import *
 
 
@@ -94,8 +95,8 @@ class Canvas:
         self.draw_text(buttonName, text_color, int(x + button_width / 2), int(y + button_height / 2))
 
     def draw_bombit_rectangles(self, x, y, color):
-        rect_width = self.width/13
-        rect_height = self.height/13
+        rect_width = math.ceil(self.width/13)
+        rect_height = math.ceil(self.height/13)
         rectangle = pygame.Rect(x*rect_width, y*rect_height, rect_width, rect_height)
         pygame.draw.rect(self.screen, color, rectangle)
 
