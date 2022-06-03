@@ -1,6 +1,6 @@
 import socket
 import threading
-import sys
+from src.server.player import Player
 from src.server.board import Board
 
 
@@ -26,36 +26,34 @@ class Server:
 
         self.currentId = "1"
 
-        self.board = Board()
+
+        self.players = []
 
         self.connections = []
         while True:
-            conn, addr = self.s.accept()
-            self.connections.append(conn)
-            print("Connected to: ", addr)
-
-            thread = threading.Thread(target=self.threaded_client, args=(conn, ))
-            thread.start()
+            for i in range (1, 3):
+                player = Player(str(i))
+                self.players.append(player)
+                conn, addr = self.s.accept()
+                self.connections.append(conn)
+                print("Connected to: ", addr)
+                thread = threading.Thread(target=self.threaded_client, args=(conn, ))
+                thread.start()
+            self.board = Board(self.players)
 
     def handle_data(self, data):
         array = data.split(":")
         client_id = int(array[0])
         command = array[1]
-        print("id =", client_id, "Command", command)
+        #print("id =", client_id, "Command", command)
         if command == "move":
             direction = array[2]
             self.board.move_character_if_possible(client_id, direction)
-            print("id =", client_id, "Direction", direction)
-        elif command == "throw":
-            pass
-            # TODO Calculate throw direction, Either place down under, or somehow save latest move direction
-        elif command == "pickup":
-            # TODO add pickups (power-ups) and ability to pick them up
-            pass
+        elif command == "plant":
+            self.board.plant_bomb_if_possible(client_id)
         elif command == "fetch":
             # Send board to clients
             self.broadcast_data("start")
-        print(self.board.to_string())
         self.broadcast_data(self.board.to_string())
 
     def broadcast_data(self, data):

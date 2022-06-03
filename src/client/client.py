@@ -1,6 +1,7 @@
 import pygame
 import socket
 import threading
+from src.client.canvas import Canvas
 from src.client.game import Game
 
 class Client:
@@ -17,7 +18,9 @@ class Client:
         self.run = False
         self.thread_running = False
         self.game = Game()
+        self.canvas = Canvas()
         self.board = []
+        self.pause_until_synced = False  # True means game will pause
 
         thread = threading.Thread(target=self.listen_thread)
         thread.start()
@@ -42,8 +45,8 @@ class Client:
         while self.thread_running:
             try:
                 data = self.client.recv(2048).decode()
-                print("Data:", data)
                 self.handle_server_data(data)
+                self.pause_until_synced = False
             except socket.error as e:
                 return str(e)
 
@@ -55,6 +58,9 @@ class Client:
         """
         try:
             self.client.send(str.encode(self.id + ":" + data))
+            self.pause_until_synced = True
+            while self.pause_until_synced:
+                pass
         except socket.error as e:
             return str(e)
 
@@ -65,7 +71,6 @@ class Client:
             row = []
             for j in range(13):
                 row.append(one_d_arr[i*13 + j])
-            print(row)
             board.append(row)
         self.board = board
 
@@ -86,32 +91,25 @@ class Client:
             self.game.apply_textures(self.board)
 
     def handle_pygame_events(self):
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                self.run = False
-
-            if event.type == pygame.K_ESCAPE:
-                self.run = False
-
+        self.canvas.update_game_state()
         keys = pygame.key.get_pressed()
+        data = ""
 
         if keys[pygame.K_RIGHT]:
-            self.send_data_to_server("move:right")
+            data = "move:right"
 
-        if keys[pygame.K_LEFT]:
-            self.send_data_to_server("move:left")
+        elif keys[pygame.K_LEFT]:
+            data = "move:left"
 
-        if keys[pygame.K_UP]:
-            self.send_data_to_server("move:up")
+        elif keys[pygame.K_UP]:
+            data = "move:up"
 
-        if keys[pygame.K_DOWN]:
-            self.send_data_to_server("move:down")
+        elif keys[pygame.K_DOWN]:
+            data = "move:down"
 
-        if keys[pygame.K_SPACE]:
-            self.send_data_to_server("throw")
-
-        if keys[pygame.K_a]:
-            self.send_data_to_server("pickup")
+        elif keys[pygame.K_SPACE]:
+            data = "plant"
+        self.send_data_to_server(data)
 
 
     def game_loop(self):
@@ -122,5 +120,5 @@ class Client:
         clock = pygame.time.Clock()
         self.run = True
         while self.run:
-            clock.tick(10)
+            clock.tick(60)
             self.handle_pygame_events() # TODO FIX, currently sends multiple events to server
