@@ -20,11 +20,8 @@ class Client:
         self.game = Game()
         self.canvas = Canvas()
         self.board = []
-        self.pause_until_synced = False  # True means game will pause
-
         thread = threading.Thread(target=self.listen_thread)
         thread.start()
-
 
         if self.id == "2":
             self.send_data_to_server("fetch")
@@ -45,8 +42,8 @@ class Client:
         while self.thread_running:
             try:
                 data = self.client.recv(2048).decode()
+                print("recieved:", data)
                 self.handle_server_data(data)
-                self.pause_until_synced = False
             except socket.error as e:
                 return str(e)
 
@@ -58,9 +55,6 @@ class Client:
         """
         try:
             self.client.send(str.encode(self.id + ":" + data))
-            self.pause_until_synced = True
-            while self.pause_until_synced:
-                pass
         except socket.error as e:
             return str(e)
 
@@ -83,7 +77,8 @@ class Client:
         """
         if data == "1:won" or data == "2:won":
             self.run = False
-            self.game.victory_screen(data)
+            array = data.split(":")
+            self.game.victory_screen(array[0], self.id)
         elif data == "start":
             self.game.waiting = False
         else:
@@ -109,8 +104,10 @@ class Client:
 
         elif keys[pygame.K_SPACE]:
             data = "plant"
-        self.send_data_to_server(data)
 
+        if data != "":
+            print("Sending: " + data)
+            self.send_data_to_server(data)
 
     def game_loop(self):
         """

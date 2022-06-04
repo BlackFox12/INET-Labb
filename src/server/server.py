@@ -1,5 +1,6 @@
 import socket
 import threading
+import time
 from src.server.player import Player
 from src.server.board import Board
 
@@ -25,40 +26,53 @@ class Server:
         self.reply = ''
 
         self.currentId = "1"
-
-
         self.players = []
-
         self.connections = []
+
         while True:
-            for i in range (1, 3):
-                player = Player(str(i))
-                self.players.append(player)
-                conn, addr = self.s.accept()
-                self.connections.append(conn)
-                print("Connected to: ", addr)
-                thread = threading.Thread(target=self.threaded_client, args=(conn, ))
-                thread.start()
-            self.board = Board(self.players)
+            conn, addr = self.s.accept()
+            player = Player(self.currentId)
+            self.players.append(player)
+            self.connections.append(conn)
+            print("Connected to: ", addr)
+            thread = threading.Thread(target=self.threaded_client, args=(conn, ))
+            thread.start()
+            if len(self.players) == 2:
+                self.board = Board(self.players)
+
+    def explosion_thread(self):
+        for i in range(3):
+            time.sleep(1)
+            self.broadcast_data(self.board.to_string())
+        if not self.players[0].is_alive():
+            self.broadcast_data("2:won")
+        if not self.players[1].is_alive():
+            self.broadcast_data("1:won")
 
     def handle_data(self, data):
         array = data.split(":")
         client_id = int(array[0])
         command = array[1]
-        #print("id =", client_id, "Command", command)
         if command == "move":
             direction = array[2]
             self.board.move_character_if_possible(client_id, direction)
         elif command == "plant":
             self.board.plant_bomb_if_possible(client_id)
+            #thread = threading.Thread(target=self.explosion_thread())
+            #thread.start()
+
         elif command == "fetch":
             # Send board to clients
             self.broadcast_data("start")
+
         self.broadcast_data(self.board.to_string())
 
     def broadcast_data(self, data):
-        for conn in self.connections:
-            conn.sendall(str.encode(data))
+        print("Broadcasting", data)
+        if data != "":
+            for conn in self.connections:
+                conn.sendall(str.encode(data))
+
 
     def threaded_client(self, conn):
         conn.send(str.encode(self.currentId))
