@@ -26,8 +26,6 @@ class Client:
         thread.start()
         self.winner = "0"
         self.data = "fetch"
-
-
         if self.id == "2":
             self.data = "fetch"
             self.send_thread = threading.Thread(target=self.send_data_to_server_thread)

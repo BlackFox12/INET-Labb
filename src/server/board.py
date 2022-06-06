@@ -4,8 +4,10 @@ import threading
 import time
 
 class Board:
-    def __init__(self, players):
+    def __init__(self, players, when_board_updates, when_player_wins):
         self.players = players
+        self.when_board_updates = when_board_updates
+        self.when_player_wins = when_player_wins
         self.board = [['#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#', '#'],
                       ['#', '1', '', '', '', '', '', '', '', '', 'P', '', '#'],
                       ['#', '', '#', '', '#', '', '#', '', '#', '', '#', '', '#'],
@@ -61,6 +63,9 @@ class Board:
     def is_not_wall(self, x, y):
         return self.board[y][x] != '#'
 
+    def is_walkable_square(self, x, y):
+        return self.board[y][x] == '' or self.board[y][x] == 'P' or self.board[y][x] == 'F'
+
     def to_string(self):
         """
         Code found here https://www.techiedelight.com/flatten-list-of-lists-python/
@@ -69,39 +74,49 @@ class Board:
         return ",".join(str(x) for x in itertools.chain.from_iterable(self.board))
 
     def move_dir(self, x_start, y_start, x_move, y_move, player_id, direction):
-        if self.is_not_wall(x_move, y_move) and not self.is_player(x_move, y_move):
-            self.pickup_powerup_if_possible(x_move, y_move, player_id)
-            self.board[y_start][x_start], self.board[y_move][x_move] = \
-                self.board[y_move][x_move], self.board[y_start][x_start]
-            self.players[int(player_id) - 1].change_player_dir(direction)
+        if self.is_walkable_square(x_move, y_move):
+            if self.board[y_move][x_move] == 'F':
+                winner = "1" if player_id == "2" else "2"
+                self.board[y_start][x_start] = ''
+                self.when_board_updates(self.to_string())
+                self.when_player_wins(winner)
+                return
+            else:
+                self.pickup_powerup_if_possible(x_move, y_move, player_id)
+                self.board[y_start][x_start], self.board[y_move][x_move] = \
+                    self.board[y_move][x_move], self.board[y_start][x_start]
+                self.players[int(player_id) - 1].change_player_dir(direction)
+                self.when_board_updates(self.to_string())
 
     def pickup_powerup_if_possible(self, x_move, y_move, player_id):
         if self.is_powerup(x_move, y_move):
             self.players[int(player_id) - 1].pickup()
             self.board[y_move][x_move] = ''
+            self.when_board_updates(self.to_string())
 
-    def plant_bomb_if_possible(self, player_id, broadcast_func):
+    def plant_bomb_if_possible(self, player_id):
         x, y = self.index_2d(str(player_id))
         x_check, y_check = self.change_check_square(x, y, self.players[int(player_id) - 1].player_direction)
         if self.is_empty(x_check, y_check):
             has_bombs = self.players[int(player_id) - 1].plant_bomb()
             if has_bombs:
                 self.board[y_check][x_check] = 'B'
+                self.when_board_updates(self.to_string())
                 thread = threading.Thread(target=self.refresh_bomb_thread,
-                                          args=(self.players[int(player_id) - 1], x_check, y_check, broadcast_func) )
+                                          args=(self.players[int(player_id) - 1], x_check, y_check))
                 thread.start()
 
-    def apply_and_remove_fire(self, x, y, broadcast_func):
+    def apply_and_remove_fire(self, x, y):
         self.apply_elem_in_cross_if_not_wall(x, y, 'F')
-        broadcast_func(self.to_string())
-        if self.players[0].life == 0:
-            broadcast_func("2:won")
-        elif self.players[1].life == 0:
-            broadcast_func("1:won")
+        self.when_board_updates(self.to_string())
+        if not self.players[0].is_alive():
+            self.when_player_wins("2")
+        elif not self.players[1].is_alive():
+            self.when_player_wins("1")
         else:
             time.sleep(1)
             self.apply_elem_in_cross_if_not_wall(x, y, '')
-            broadcast_func(self.to_string())
+            self.when_board_updates(self.to_string())
 
     def apply_elem_in_cross_if_not_wall(self, x, y, elem):
         directions = [[1, 0], [-1, 0], [0, 1], [0, -1]]
@@ -109,16 +124,16 @@ class Board:
         for cords in directions:
             no_wall_flag = True
             for i in range(1, 3):
-                if self.is_not_wall(x + cords[0] * i, y + cords[1] * i) and no_wall_flag:
+                if no_wall_flag and self.is_not_wall(x + cords[0] * i, y + cords[1] * i):
                     if self.is_player(x + cords[0] * i, y + cords[1] * i):
                         self.players[int(self.board[y + cords[1] * i][x + cords[0] * i]) - 1].life = 0
                     self.board[y + cords[1] * i][x + cords[0] * i] = elem
                 else:
                     no_wall_flag = False
 
-    def refresh_bomb_thread(self, player, x, y, broadcast_func):
+    def refresh_bomb_thread(self, player, x, y):
         time.sleep(3)
-        self.apply_and_remove_fire(x, y, broadcast_func)
+        self.apply_and_remove_fire(x, y)
         player.pickup()
         self.board[y][x] = ''
 
