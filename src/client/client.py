@@ -1,6 +1,8 @@
 import pygame
 import socket
 import threading
+import time
+import sys
 from src.client.canvas import Canvas
 from src.client.game import Game
 
@@ -16,19 +18,25 @@ class Client:
         self.id = self.connect()
         print("ID:", self.id)
         self.run = False
-        self.thread_running = False
+        self.thread_running = True
         self.game = Game()
         self.canvas = Canvas()
         self.board = []
         thread = threading.Thread(target=self.listen_thread)
         thread.start()
         self.winner = "0"
+        self.data = "fetch"
+
 
         if self.id == "2":
-            self.send_data_to_server("fetch")
+            self.data = "fetch"
+            self.send_thread = threading.Thread(target=self.send_data_to_server_thread)
+            self.send_thread.start()
             self.game_loop()
         else:
             self.game.waiting_for_players_screen()
+            self.send_thread = threading.Thread(target=self.send_data_to_server_thread)
+            self.send_thread.start()
             self.game_loop()
 
     def connect(self):
@@ -39,7 +47,6 @@ class Client:
         """
         Retrieve data from server on a continious running thread.
         """
-        self.thread_running = True
         while self.thread_running:
             try:
                 data = self.client.recv(2048).decode()
@@ -48,14 +55,18 @@ class Client:
             except socket.error as e:
                 return str(e)
 
-    def send_data_to_server(self, data):
+    def send_data_to_server_thread(self):
         """
         Send data to server as an encoded string
         :param data:
         :return:
         """
         try:
-            self.client.send(str.encode(self.id + ":" + data))
+            print("Sending: " + self.data)
+            self.client.send(str.encode(self.id + ":" + self.data))
+            self.data = ""
+            time.sleep(0.25)
+            sys.exit()
         except socket.error as e:
             return str(e)
 
@@ -78,7 +89,7 @@ class Client:
         """
         if data == "1:won" or data == "2:won":
             self.run = False
-            self.thread_running = True
+            self.thread_running = False
             array = data.split(":")
             self.winner = array[0]
         elif data == "start":
@@ -90,26 +101,26 @@ class Client:
     def handle_pygame_events(self):
         self.canvas.update_game_state()
         keys = pygame.key.get_pressed()
-        data = ""
+        self.data = ""
 
         if keys[pygame.K_RIGHT]:
-            data = "move:right"
+            self.data = "move:right"
 
         elif keys[pygame.K_LEFT]:
-            data = "move:left"
+            self.data = "move:left"
 
         elif keys[pygame.K_UP]:
-            data = "move:up"
+            self.data = "move:up"
 
         elif keys[pygame.K_DOWN]:
-            data = "move:down"
+            self.data = "move:down"
 
         elif keys[pygame.K_SPACE]:
-            data = "plant"
+            self.data = "plant"
 
-        if data != "":
-            print("Sending: " + data)
-            self.send_data_to_server(data)
+        if self.data != "" and not self.send_thread.is_alive():
+            self.send_thread = threading.Thread(target=self.send_data_to_server_thread)
+            self.send_thread.start()
 
     def game_loop(self):
         """
@@ -119,8 +130,7 @@ class Client:
         clock = pygame.time.Clock()
         self.run = True
         while self.run:
-            clock.tick(60)
+            clock.tick(40)
             self.handle_pygame_events() # TODO FIX, currently sends multiple events to server
-        while True:
-            self.game.victory_screen(self.winner, self.id)
+        self.game.victory_screen(self.winner, self.id)
 

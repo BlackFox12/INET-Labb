@@ -1,6 +1,5 @@
 import socket
 import threading
-import time
 from src.server.player import Player
 from src.server.board import Board
 
@@ -21,24 +20,29 @@ class Server:
         except socket.error as e:
             print(str(e))
 
-        self.s.listen(2)
+        self.s.listen(3)
         print("Waiting for a connection")
         self.reply = ''
 
-        self.currentId = "1"
         self.players = []
         self.connections = []
+        self.occupied_connections = [["1", False], ["2", False]]
 
         while True:
             conn, addr = self.s.accept()
-            player = Player(self.currentId)
-            self.players.append(player)
-            self.connections.append(conn)
-            print("Connected to: ", addr)
-            thread = threading.Thread(target=self.threaded_client, args=(conn, ))
-            thread.start()
+            if not self.occupied_connections[0][1]:
+                self.occupied_connections[0][1] = True
+                self.currentId = connection[0]
+                player = Player(self.currentId)
+                self.players.append(player)
+                self.connections.append(conn)
+                print("Connected to: ", addr)
+                thread = threading.Thread(target=self.threaded_client, args=(conn, ))
+                thread.start()
             if len(self.players) == 2:
                 self.board = Board(self.players)
+
+    def accept
 
     def handle_data(self, data):
         array = data.split(":")
@@ -65,7 +69,7 @@ class Server:
 
     def threaded_client(self, conn):
         conn.send(str.encode(self.currentId))
-        self.currentId = "2"
+        #self.currentId = "2"
         while True:
             try:
                 data = conn.recv(2048)

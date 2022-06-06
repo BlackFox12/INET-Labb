@@ -4,8 +4,18 @@ from pygame.locals import *
 
 
 class Canvas:
+    """
+    Class for handling many pygame display related things.
+    Like drawing buttons and text on the display.
+    """
 
     def __init__(self, w=800, h=800, name="Bombit Menu"):
+        """
+        Init for the Canvas class
+        :param w: display-width
+        :param h: display height
+        :param name: the name that is displayed in top-left corner
+        """
         self.width = w
         self.height = h
 
@@ -34,20 +44,20 @@ class Canvas:
 
     @staticmethod
     def update():
+        """
+        Updates the display with all the newly added display stuff
+        :return:
+        """
         pygame.display.update()
 
     def draw_text(self, text, color, x, y, center=True):
         """Draws text on screen
-        In:
-            self,
-            text - The text to be written on the screen
-            color - What color the text should have
-            surface - What surface the text should be on (in this program always self.screen)
-            x - the position in x-direction
-            y - the position i y-direction
-            center - if True then x,y = center of text, else x,y = upper left corner
-        Out:
-            None
+        :param text: The text to be written on the screen
+        :param color: What color the text should have
+        :param x: The position in x-direction
+        :param y: The position i y-direction
+        :param center: Ff True then x,y = center of text, else x,y = upper left corner
+        :return:
         """
         pygame.font.init()
         font = pygame.font.SysFont("comicsans", 20)
@@ -59,23 +69,21 @@ class Canvas:
             text_rect.midleft = (int(x), int(y))
         self.screen.blit(text_obj, text_rect)
 
-    def get_canvas(self):
-        return self.screen
-
     def draw_background(self):
+        """
+        Paints the whole screen in white
+        :return:
+        """
         self.screen.fill(self.white_color)
 
     def create_button(self, buttonName, function, x, y, enabled=True):
         """Creates clickable buttons if criteria is met
-        In:
-            self,
-            buttonName - Text on the button
-            function - what function the button should call upon when pressed
-            x - coordinates for button
-            y - coordinates for button
-            enabled - Only proceeds to call funtion if True
-        Out:
-            None
+        :param buttonName: Text on the button
+        :param function: THe function the button should call upon when pressed
+        :param x: coordinates for buttons upper left corner (in x - direction)
+        :param y: coordinates for buttons upper left corner (in y - direction)
+        :param enabled: Only proceeds to call function if True
+        :return:
         """
         button_width = 200
         button_height = 50
@@ -90,29 +98,24 @@ class Canvas:
                         function()
 
         else:
-            text_color = (255, 0, 0)  # Red color (if name is invalid)
+            text_color = (255, 0, 0)  # Red color (if enabled = False)
         pygame.draw.rect(self.screen, self.grey_color, button)
         self.draw_text(buttonName, text_color, int(x + button_width / 2), int(y + button_height / 2))
 
 
 
-    def update_game_state(self, esq_shut_down = False):
+    def update_game_state(self, esc_shut_down = False):
         """Updates the game, handles all input from mouse and keyboard if valid
-        In:
-            self,
-            shutDown - Only True on main menu, handles if escape-key should shut down the game or just make you go back to the menu
-            text - Only True on the screen where you can change your name
-        Out:
-            None
+        :param esc_shut_down - Only True on main menu, handles if escape-key should shut down the game or just make you go back to the menu
+        :return:
         """
-
         self.click = False
         for event in pygame.event.get():
             if event.type == QUIT:
                 pygame.quit()
             if event.type == KEYDOWN:
                 if event.key == K_ESCAPE:
-                    if esq_shut_down:  # Only True on main menu (so far)
+                    if esc_shut_down:  # Only True on main menu (so far)
                         pygame.quit()
                     else:
                         self.running = False

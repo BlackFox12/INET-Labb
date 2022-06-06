@@ -5,6 +5,11 @@ from src.client.canvas import Canvas
 
 
 class Game:
+    """
+    Game class. Mainly applies textures on the bombit game board.
+    But also has two different screens, one for before the game starts,
+    and one for when the game is over.
+    """
 
     def __init__(self, w=800, h=800):
         self.width = w
@@ -19,6 +24,11 @@ class Game:
 
 
     def apply_textures(self, board):
+        """
+        Applies textures to the board, I.e 62*62 pixel images.
+        :param board: The game board that represents the current state of the game
+        :return:
+        """
         for y in range(len(board)):
             for x in range(len(board[y])):
                 if board[y][x] == "#":
@@ -49,6 +59,14 @@ class Game:
 
 
     def draw_background(self, x, y, texture_type):
+        """
+        Draws background objects, either wall or ground depending on texture_type
+        :param x: Coordinates in X-direction for upper left corner of the image
+        :param y: oordinates in Y-direction for upper left corner of the image
+        :param texture_type: Should be either 'wall' or 'ground' depending on
+                    what type of texture square contains.
+        :return:
+        """
         if texture_type == "wall":
             bomb_img = pygame.image.load(
                 os.path.join(os.path.dirname(__file__), '..', '..', 'pictures', 'Wall.png'))
