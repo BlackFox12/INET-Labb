@@ -27,7 +27,7 @@ class Menu:
         buttonList = [["Play", self.waiting_for_players_screen],
                       ["Settings", self.settings_screen],
                       ["Instructions", self.instructions_screen],
-                      ["Quit game", self.quit_game]]
+                      ["Quit game", pygame.quit]]
         while True:
             self.canvas.update_game_state(esq_shut_down=True)
             self.canvas.draw_background()
@@ -45,9 +45,9 @@ class Menu:
         Out:
             None
         """
-
         pygame.quit()
-        Client()
+        winner_id, self_id = Client()
+
 
     def settings_screen(self):
         """Shows the instructions for how to play the game
@@ -97,13 +97,4 @@ class Menu:
                                       self.canvas.height - self.canvas.button_height * 3)
             self.canvas.update_game_state()
 
-    def quit_game(self):
-        """Screen where you can enter your in grey boxes, can only proceed if valid name is input
-        In:
-            self,
-            numberOfPlayers - The amount of players in the game
-        Out:
-            None
-        """
 
-        pygame.quit()

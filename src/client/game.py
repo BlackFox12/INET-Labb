@@ -99,10 +99,11 @@ class Game:
                                       self.canvas.height - self.canvas.button_height * 3)
             self.canvas.update_game_state()
 
+
     def victory_screen(self, winning_id, client_id):
         self.canvas.click = False
+        self.canvas.running = True
         self.canvas.draw_background()
-        self.waiting = True
 
         while self.canvas.running:
             self.canvas.draw_background()
@@ -116,3 +117,4 @@ class Game:
             self.canvas.create_button("Back", 0, int((self.canvas.width - self.canvas.button_width) / 2),
                                       self.canvas.height - self.canvas.button_height * 3)
             self.canvas.update_game_state()
+

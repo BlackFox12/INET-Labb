@@ -40,15 +40,6 @@ class Server:
             if len(self.players) == 2:
                 self.board = Board(self.players)
 
-    def explosion_thread(self):
-        for i in range(3):
-            time.sleep(1)
-            self.broadcast_data(self.board.to_string())
-        if not self.players[0].is_alive():
-            self.broadcast_data("2:won")
-        if not self.players[1].is_alive():
-            self.broadcast_data("1:won")
-
     def handle_data(self, data):
         array = data.split(":")
         client_id = int(array[0])
@@ -57,9 +48,7 @@ class Server:
             direction = array[2]
             self.board.move_character_if_possible(client_id, direction)
         elif command == "plant":
-            self.board.plant_bomb_if_possible(client_id)
-            #thread = threading.Thread(target=self.explosion_thread())
-            #thread.start()
+            self.board.plant_bomb_if_possible(client_id, self.broadcast_data)
 
         elif command == "fetch":
             # Send board to clients

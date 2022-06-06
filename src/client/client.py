@@ -22,6 +22,7 @@ class Client:
         self.board = []
         thread = threading.Thread(target=self.listen_thread)
         thread.start()
+        self.winner = "0"
 
         if self.id == "2":
             self.send_data_to_server("fetch")
@@ -77,8 +78,9 @@ class Client:
         """
         if data == "1:won" or data == "2:won":
             self.run = False
+            self.thread_running = True
             array = data.split(":")
-            self.game.victory_screen(array[0], self.id)
+            self.winner = array[0]
         elif data == "start":
             self.game.waiting = False
         else:
@@ -119,3 +121,6 @@ class Client:
         while self.run:
             clock.tick(60)
             self.handle_pygame_events() # TODO FIX, currently sends multiple events to server
+        while True:
+            self.game.victory_screen(self.winner, self.id)
+
