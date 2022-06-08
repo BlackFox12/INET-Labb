@@ -77,6 +77,14 @@ class Game:
             self.screen.blit(bomb_img, (x * self.background_size, y * self.background_size))
 
     def draw_player(self, x, y, player):
+        """
+        Draws the player sprite, x and y represents coords on the board which are translated to pixel-cords
+            based on the size of the window.
+        :param x: Coords on a board
+        :param y: Coords on a board
+        :param player: The player on those coords
+        :return:
+        """
         if player == "player1":
             bomb_img = pygame.image.load(os.path.join(os.path.dirname(__file__), '..', '..', 'pictures', 'red_dragon.png'))
             self.screen.blit(bomb_img, (x * self.background_size, y * self.background_size))
@@ -85,23 +93,41 @@ class Game:
             self.screen.blit(bomb_img, (x * self.background_size, y * self.background_size))
 
     def draw_bomb(self, x, y):
+        """
+        Draws the bomb sprite, x and y represents coords on the board which are translated to pixel-cords
+            based on the size of the window.
+        :param x: Coords on a board
+        :param y: Coords on a board
+        :return:
+        """
         bomb_img = pygame.image.load(os.path.join(os.path.dirname( __file__ ), '..', '..', 'pictures', 'tnt.png'))
         self.screen.blit(bomb_img, (x*self.background_size, y*self.background_size))
 
     def draw_bonus_bomb(self, x, y):
+        """
+        Draws the bonus-bomb sprite, x and y represents coords on the board which are translated to pixel-cords
+            based on the size of the window.
+        :param x: Coords on a board
+        :param y: Coords on a board
+        :return:
+        """
         bomb_img = pygame.image.load(os.path.join(os.path.dirname( __file__ ), '..', '..', 'pictures', 'bonusTnt.png'))
         self.screen.blit(bomb_img, (x * self.background_size, y * self.background_size))
 
     def draw_fire(self, x, y):
+        """
+        Draws the fire sprite, x and y represents coords on the board which are translated to pixel-cords
+            based on the size of the window.
+        :param x: Coords on a board
+        :param y: Coords on a board
+        :return:
+        """
         bomb_img = pygame.image.load(os.path.join(os.path.dirname( __file__ ), '..', '..', 'pictures', 'fire.png'))
         self.screen.blit(bomb_img, (x * self.background_size, y * self.background_size))
 
     def waiting_for_players_screen(self):
-        """Shows the instructions for how to play the game
-        In:
-            self
-        Out:
-            None
+        """ The screen the first player arrives at until more players join
+        :return:
         """
         # TODO fix so that you can go back to menu
         self.canvas.click = False
@@ -118,7 +144,13 @@ class Game:
             self.canvas.update_game_state()
 
 
-    def victory_screen(self, winning_id, client_id):
+    def game_end_screen(self, winning_id, client_id):
+        """
+        The screen the players arrive at when the game is over.
+        :param winning_id:
+        :param client_id:
+        :return:
+        """
         self.canvas.click = False
         self.canvas.running = True
         self.canvas.draw_background()

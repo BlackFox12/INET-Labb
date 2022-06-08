@@ -7,6 +7,8 @@ from src.client.canvas import Canvas
 from src.client.game import Game
 
 class Client:
+    """The class responsible for communicating with the server and handling the server data
+    """
     # TODO: Make Client constantly listen to server so that it can get any updates it requires
     def __init__(self):
         self.client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -130,5 +132,5 @@ class Client:
         while self.run:
             clock.tick(40)
             self.handle_pygame_events() # TODO FIX, currently sends multiple events to server
-        self.game.victory_screen(self.winner, self.id)
+        self.game.game_end_screen(self.winner, self.id)
 
