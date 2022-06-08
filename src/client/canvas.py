@@ -102,9 +102,7 @@ class Canvas:
         pygame.draw.rect(self.screen, self.grey_color, button)
         self.draw_text(buttonName, text_color, int(x + button_width / 2), int(y + button_height / 2))
 
-
-
-    def update_game_state(self, esc_shut_down = False):
+    def update_game_state(self, esc_shut_down=False):
         """Updates the game, handles all input from mouse and keyboard if valid
         :param esc_shut_down - Only True on main menu, handles if escape-key should shut down the game or just make you go back to the menu
         :return:

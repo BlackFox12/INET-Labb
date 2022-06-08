@@ -1,6 +1,8 @@
 import pygame
+
 from src.client.canvas import Canvas
 from src.client.client import Client
+
 
 class Menu:
     """
@@ -10,6 +12,9 @@ class Menu:
 
 
     def __init__(self):
+        """
+        Init for the menu class, sets up the screen and calls the main_menu function
+        """
         self.canvas = Canvas()
         self.screen = self.canvas.screen
         self.canvas.running = True

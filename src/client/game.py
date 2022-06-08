@@ -1,6 +1,8 @@
-import pygame
 import math
 import os
+
+import pygame
+
 from src.client.canvas import Canvas
 
 
@@ -12,6 +14,11 @@ class Game:
     """
 
     def __init__(self, w=800, h=800):
+        """
+        Init for the Bombit class. Sets up the pygame window for the game and a couple of global variables and flags
+        :param w: The width of the pygame window, initial size is 800 pixels
+        :param h: The width of the pygame window, initial size is 800 pixels
+        """
         self.width = w
         self.height = h
         self.board_size = 13
